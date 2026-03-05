@@ -140,8 +140,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'konardhanalakshmi@gmail.com'
-EMAIL_HOST_PASSWORD = 'ywog gyqd hslx xpys'
+EMAIL_HOST_USER = 'nambi.in09@gmail.com'
+EMAIL_HOST_PASSWORD = 'paha omaa onft jqxq'
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -153,4 +153,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MIDDLEWARE = [
 'whitenoise.middleware.WhiteNoiseMiddleware',
+]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    ...
 ]
