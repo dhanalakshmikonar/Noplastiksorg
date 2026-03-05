@@ -144,3 +144,11 @@ EMAIL_HOST_USER = 'konardhanalakshmi@gmail.com'
 EMAIL_HOST_PASSWORD = 'ywog gyqd hslx xpys'
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+ALLOWED_HOSTS = ['.onrender.com','yourdomain.com']
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MIDDLEWARE = [
+'whitenoise.middleware.WhiteNoiseMiddleware',
+]
