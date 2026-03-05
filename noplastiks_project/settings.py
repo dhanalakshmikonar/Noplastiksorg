@@ -147,6 +147,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 ALLOWED_HOSTS = ['.onrender.com','yourdomain.com']
 
+ALLOWED_HOSTS = ['*']
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MIDDLEWARE = [
