@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Checkout | Noplastiks</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f3ef, #e8e6e1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .checkout-card {
+            background: #ffffff;
+            padding: 50px;
+            width: 420px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            text-align: center;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .amount-box {
+            background: #faf9f6;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .amount-box h2 {
+            margin: 0;
+            font-size: 28px;
+            color: #b48a2c;
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #b48a2c, #d4af37);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(180,138,44,0.3);
+        }
+
+        .secure-text {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="checkout-card">
+
+    <div class="brand">Noplastiks</div>
+    <div class="subtitle">Premium Quality Wooden Toys</div>
+
+    <div class="amount-box">
+        <p>Total Payable</p>
+        <h2>₹ {{ total }}</h2>
+    </div>
+
+    <button id="pay-btn" class="pay-btn">
+        Pay Securely with Razorpay
+    </button>
+
+    <div class="secure-text">
+        🔒 100% Secure Payment • Encrypted & Safe
+    </div>
+
+</div>
+
+<script>
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ payment.amount }}",
+    "currency": "INR",
+    "order_id": "{{ payment.id }}",
+    "name": "Noplastiks",
+    "description": "Luxury Wooden Toys",
+    "theme": {
+        "color": "#b48a2c"
+    },
+    "handler": function (response){
+        alert("Payment Successful!");
+        window.location.href = "/";
+    }
+};
+
+var rzp1 = new Razorpay(options);
+
+document.getElementById('pay-btn').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+
+</body>
+</html>

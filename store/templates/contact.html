@@ -1,0 +1,139 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact | Woodé Luxe</title>
+
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="nav-container">
+    <div class="logo">Noplastiks</div>
+
+
+    <nav>
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'home' %}#about">About</a>
+    <a href="{% url 'catalog' %}">Catalog</a>
+    <a href="{% url 'contact' %}">Contact</a>
+</nav>
+
+     <div class="nav-right">
+
+  {% if user.is_authenticated %}
+      <a href="{% url 'logout' %}" class="user-avatar">
+          {{ user.username|first|upper }}
+      </a>
+  {% else %}
+      <a href="{% url 'login' %}" class="signin">Sign In</a>
+  {% endif %}
+
+            <a href="{% url 'cart' %}">
+🛒
+<span>
+{% if user.is_authenticated %}
+    {{ user.cart.cartitem_set.count }}
+{% else %}
+    0
+{% endif %}
+</span>
+</a>
+    </div>
+  </div>
+</header>
+
+<!-- CONTACT HERO -->
+<section class="page-hero">
+  <h1>Get In Touch</h1>
+  <p>We’d love to hear from you.</p>
+</section>
+
+<!-- CONTACT CONTENT -->
+<section class="contact-section">
+  <div class="contact-grid">
+    {% if success %}
+<script>
+alert("Message sent successfully!");
+</script>
+{% endif %}
+
+    <form method="POST" action="{% url 'contact' %}" class="contact-form">
+{% csrf_token %}
+
+<input type="text" name="name" placeholder="Full Name" required>
+
+<input type="email" name="email" placeholder="Email Address" required>
+
+<textarea name="message" rows="6" placeholder="Your Message"></textarea>
+
+<button type="submit" class="btn-gold">Send Message</button>
+
+</form>
+
+    <div class="contact-map" style="width:100%; max-width:550px; overflow:hidden;">
+    <img src="{% static 'img/contact.jpeg' %}" 
+         alt="Contact Image"
+         style="width:100%; height:350px; object-fit:cover; border-radius:8px; display:block;">
+</div>
+
+  </div>
+</section>
+
+<footer class="lux-footer">
+
+  <div class="footer-container">
+
+    <!-- LEFT COLUMN -->
+    <div class="footer-col">
+      <h3 class="footer-logo">Woodé Luxe</h3>
+      <p class="footer-desc">
+        Discover timeless handcrafted wooden toys built with
+        precision, sustainability, and Scandinavian elegance.
+        Designed to inspire creativity and last generations.
+      </p>
+      <p class="copyright">Copyright © 2026</p>
+    </div>
+
+    <!-- MIDDLE COLUMN -->
+    <div class="footer-col">
+      <h4 class="footer-title">Useful Links</h4>
+       <ul class="footer-links">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'home' %}#about">About</a></li>
+    <li><a href="{% url 'catalog' %}">Catalog</a></li>
+    <li><a href="{% url 'contact' %}">Contact</a></li>
+  </ul>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="footer-col">
+      <h4 class="footer-title">Follow Us</h4>
+      <div class="social-links">
+        <a href="#">Facebook</a>
+        <a href="#">Instagram</a>
+      </div>
+
+      <div class="footer-cta">
+        <h4>Explore Our Collection</h4>
+        <p>
+          Browse our handcrafted wooden toys designed to bring
+          balance, imagination, and creativity together.
+        </p>
+        <a href="catalog.html" class="footer-shop-btn">Shop Now</a>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoPlastiks | Luxury Wooden Toys</title>
+
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="header">
+  <div class="nav-container">
+    <div class="logo">NoPlastiks</div>
+
+   <nav>
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'home' %}#about">About</a>
+    <a href="{% url 'catalog' %}">Catalog</a>
+    <a href="{% url 'contact' %}">Contact</a>
+</nav>
+
+    <div class="nav-right">
+
+  {% if user.is_authenticated %}
+      <a href="{% url 'logout' %}" class="user-avatar">
+          {{ user.username|first|upper }}
+      </a>
+  {% else %}
+      <a href="{% url 'login' %}" class="signin">Sign In</a>
+  {% endif %}
+
+        <a href="{% url 'cart' %}">
+🛒
+<span>
+{% if user.is_authenticated %}
+    {{ user.cart.cartitem_set.count }}
+{% else %}
+    0
+{% endif %}
+</span>
+</a>
+
+</div>
+  </div>
+</header>
+
+<!-- HERO SLIDER -->
+<section class="hero">
+  <div class="slides">
+
+    <div class="slide active">
+      <img src="{% static 'img/img1.png' %}">
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <h1 style="color: black;">Timeless Wooden Craftsmanship</h1>
+        <p style="color: black;">Sustainably crafted toys designed to last generations.</p>
+        <a href="catalog.html" class="btn-gold">Shop Collection</a>
+      </div>
+    </div>
+
+    <div class="slide">
+      <img src="{% static 'img/img2.png' %}">
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <h1 style="color: black;">Handcrafted With Precision</h1>
+        <p style="color: black;">Minimal. Elegant. Built to last.</p>
+        <a href="{% url 'catalog' %}" class="btn-gold">Shop Collection</a>
+      </div>
+    </div>
+
+    <div class="slide">
+      <video autoplay muted loop playsinline>
+        <source src="{% static 'img/video_childplay.mp4' %}" type="video/mp4">
+      </video>
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <h1 style="color: black;">Crafted By Artisans</h1>
+        <p style="color: black;">Heritage woodworking techniques.</p>
+        <a href="{% url 'catalog' %}" class="btn-gold">Shop Collection</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section id="about" class="about">
+
+  <!-- OUTSIDE HEADING -->
+  <div class="about-heading">
+    <h2>About Us</h2>
+    <div class="gold-line"></div>
+  </div>
+
+  <div class="about-grid">
+
+    <div class="about-image">
+      <img src="{% static 'img/about.jpeg' %}">
+    </div>
+
+    <div class="about-card">
+      <p>
+        At <strong>Noplastiks</strong>, we believe toys should be more than entertainment —
+        they should be heirlooms. Each piece is crafted from sustainably
+        sourced timber, shaped by skilled artisans, and finished with non-toxic polish.
+      </p>
+
+      <p>
+        Inspired by wooden toy minimalism and timeless craftsmanship,
+        our collections blend elegance with imagination — built to inspire creativity
+        across generations.
+      </p>
+
+      <div class="about-features">
+        <div>
+          <h4>100% Sustainable</h4>
+          <span>Responsibly sourced timber</span>
+        </div>
+        <div>
+          <h4>Non-Toxic Finish</h4>
+          <span>Safe & eco-friendly coatings</span>
+        </div>
+        <div>
+          <h4>Handcrafted</h4>
+          <span>Artisan precision</span>
+        </div>
+      </div>
+
+      <a href="{% url 'catalog' %}" class="btn-premium">Explore Collection</a>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="about">
+  <div class="about-grid">
+    <img src="{% static 'img/img3.jpeg' %}">
+    <div>
+      <h2>Our Story</h2><br><br>
+      <p>
+At Noplastiks, our journey began with a simple belief — children deserve a safer, healthier world to grow and play in. Inspired by nature and driven by responsibility, Noplastiks was created to replace plastic with purpose. We craft beautifully designed wooden toys in a wide range of varieties, thoughtfully made to spark imagination, creativity, and joyful learning. Every toy we produce reflects our commitment to quality, sustainability, and timeless play.
+</p>
+
+<p>
+From colorful stacking sets to educational learning boards and classic wooden games, our collections are designed to nurture young minds while protecting the planet. We carefully select eco-friendly materials and ensure each product is durable, non-toxic, and child-safe. Our toys are not just playthings — they are tools for growth, exploration, and meaningful childhood memories.
+</p>
+
+<p>
+At Noplastiks, we believe in making choices that matter. By choosing wooden over plastic, we reduce waste, support sustainable practices, and encourage conscious living. Our mission is simple: Go Sustainable. Go Green. Choose better for your child and for the Earth. Together, we can build a brighter, cleaner future — one wooden toy at a time.
+</p><br>
+      <a href="{% url 'catalog' %}" class="btn-premium">Explore Collection</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section class="featured">
+  <h2>Featured Collection</h2>
+
+  <div class="product-grid">
+    <div class="product-card">
+      <img src="{% static 'img/brainyboss legmaze.png' %}" >
+      <h3>Brainyboss Legmaze</h3>
+      <p class="price">Rs.7999</p>
+      <button class="btn-primary">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <img src="{% static 'img/brainyboss kids.jpg' %}" >
+      <h3>Brainyboss kids</h3>
+      <p class="price">Rs.6999</p>
+      <button class="btn-primary">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <img src="{% static 'img/brainyboss_mr.doctor.png' %}" >
+      <h3>Brainyboss Mr.Doctor</h3>
+      <p class="price">Rs.8999</p>
+      <button class="btn-primary">Add to Cart</button>
+    </div>
+
+    
+  </div>
+</section>
+
+<footer class="lux-footer">
+
+  <div class="footer-container">
+
+    <!-- LEFT COLUMN -->
+    <div class="footer-col">
+      <h3 class="footer-logo">Woodé Luxe</h3>
+      <p class="footer-desc">
+        Discover timeless handcrafted wooden toys built with
+        precision, sustainability, and Scandinavian elegance.
+        Designed to inspire creativity and last generations.
+      </p>
+      <p class="copyright">Copyright © 2026</p>
+    </div>
+
+    <!-- MIDDLE COLUMN -->
+    <div class="footer-col">
+      <h4 class="footer-title">Useful Links</h4>
+       <ul class="footer-links">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'home' %}#about">About</a></li>
+    <li><a href="{% url 'catalog' %}">Catalog</a></li>
+    <li><a href="{% url 'contact' %}">Contact</a></li>
+  </ul>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="footer-col">
+      <h4 class="footer-title">Follow Us</h4>
+      <div class="social-links">
+        <a href="#">Facebook</a>
+        <a href="#">Instagram</a>
+      </div>
+
+      <div class="footer-cta">
+        <h4>Explore Our Collection</h4>
+        <p>
+          Browse our handcrafted wooden toys designed to bring
+          balance, imagination, and creativity together.
+        </p>
+        <a href="catalog.html" class="footer-shop-btn">Shop Now</a>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+<script src="{% static 'script.js' %}"></script>
+</body>
+</html>

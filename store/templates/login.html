@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login | Noplastiks</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+
+<body class="auth-body">
+
+<div class="auth-wrapper">
+
+    <!-- Left Branding Section -->
+    <div class="auth-left">
+        <h1>NoPlastiks</h1>
+        <p>Wooden Toys Crafted With Purpose.</p>
+    </div>
+
+    <!-- Right Login Card -->
+    <div class="auth-card">
+        <h2>Welcome Back</h2>
+
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+
+            <div class="input-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+            </div>
+
+            <div class="input-group">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+            </div>
+
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+
+        <p class="auth-footer">
+            Don't have an account?
+            <a href="{% url 'register' %}">Create one</a>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logout | NoPlastiks</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+    <h2>Are you sure you want to logout?</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary">Confirm Logout</button>
+    </form>
+
+    <br>
+    <a href="{% url 'home' %}" class="btn-secondary">Cancel</a>
+</div>
+
+</body>
+</html>
