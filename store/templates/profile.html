@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | BrainyBoss</title>
+    <link rel="icon" type="image/png" href="{% static 'img/brainyboss_logo.png' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body class="auth-body">
+    <header class="auth-header">
+        <a href="{% url 'home' %}" class="brand-lockup" aria-label="BrainyBoss home">
+            <img src="{% static 'img/brainyboss_logo.png' %}" alt="" class="brand-logo-image">
+            <span class="brand-name">BrainyBoss</span>
+        </a>
+        <a href="{% url 'logout' %}" class="auth-link">Logout</a>
+    </header>
+    <main class="auth-container">
+        <h2>My Profile</h2>
+        <p>You are signed in as <strong>{{ user.email }}</strong>.</p>
+        <p>Your account stays signed in while you browse the store.</p>
+        <a href="{% url 'home' %}">Continue shopping</a>
+    </main>
+</body>
+</html>

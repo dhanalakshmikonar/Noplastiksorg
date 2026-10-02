@@ -1,10 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, logout
+from django.contrib.auth import logout
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
 from django.conf import settings
-from .forms import CleanUserCreationForm
+from .forms import CleanUserCreationForm, EmailAuthenticationForm
 from .models import Product, Cart, CartItem
 import razorpay
 
@@ -13,14 +19,15 @@ import razorpay
 # HOME
 # =========================
 def home(request):
-    return render(request, 'home.html')
+    featured_products = Product.objects.only('id', 'name', 'price', 'image').order_by('created_at')[:3]
+    return render(request, 'home.html', {'featured_products': featured_products})
 
 
 # =========================
 # CATALOG
 # =========================
 def catalog(request):
-    products = Product.objects.all()
+    products = Product.objects.only('id', 'name', 'price', 'image').order_by('name')
     return render(request, 'catalog.html', {'products': products})
 
 
@@ -28,16 +35,52 @@ def catalog(request):
 # REGISTER
 # =========================
 def register(request):
+    error = None
     if request.method == 'POST':
         form = CleanUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('home')
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verify_url = request.build_absolute_uri(
+                reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
+            )
+            subject = 'Verify your BrainyBoss email address'
+            message = (
+                f"Hello,\n\nPlease verify your email address to activate your BrainyBoss account:\n"
+                f"{verify_url}\n\nIf you did not create this account, you can ignore this message."
+            )
+            try:
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+            except Exception:
+                # Don't leave an unusable pending account if delivery couldn't be attempted.
+                user.delete()
+                error = "We couldn't send the verification email. Please try again later or contact support."
+            else:
+                return render(request, 'register.html', {'form': CleanUserCreationForm(), 'verification_sent': True})
     else:
         form = CleanUserCreationForm()
 
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'register.html', {'form': form, 'error': error})
+
+
+def verify_email(request, uidb64, token):
+    try:
+        user_id = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=user_id)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and not user.is_active and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+        return render(request, 'email_verified.html', {'verified': True})
+    return render(request, 'email_verified.html', {'verified': False})
+
+
+class EmailLoginView(LoginView):
+    template_name = 'login.html'
+    authentication_form = EmailAuthenticationForm
 
 
 # =========================
@@ -48,46 +91,32 @@ def logout_view(request):
     return redirect('home')
 
 
+@login_required
+def profile(request):
+    return render(request, 'profile.html')
+
+
 # =========================
 # ADD TO CART
 # =========================
-@login_required
+@require_POST
 def add_to_cart(request, product_id):
-
     product = get_object_or_404(Product, id=product_id)
+    if not request.user.is_authenticated:
+        request.session['pending_cart_product_id'] = product.pk
+        return redirect(f"{reverse('login')}?next={reverse('cart')}")
 
-    cart, created = Cart.objects.get_or_create(user=request.user)
-
-    cart_item, created = CartItem.objects.get_or_create(
-        cart=cart,
-        product=product
-    )
-
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-
-    # EMAIL NOTIFICATION
-    message = f"""
-Product Added To Cart
-
-Customer: {request.user.username}
-Customer Email: {request.user.email}
-
-Product: {product.name}
-Price: ₹{product.price}
-Quantity: {cart_item.quantity}
-"""
-
-    send_mail(
-        "Cart Update - Product Added",
-        message,
-        settings.EMAIL_HOST_USER,
-        ["konardhanalakshmi@gmail.com"],
-        fail_silently=False,
-    )
+    _add_product_to_cart(request.user, product)
 
     return redirect('cart')
+
+
+def _add_product_to_cart(user, product):
+    cart, _ = Cart.objects.get_or_create(user=user)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save(update_fields=['quantity'])
 
 
 # =========================
@@ -106,9 +135,14 @@ def remove_from_cart(request, item_id):
 # =========================
 @login_required
 def cart_view(request):
-
     cart, created = Cart.objects.get_or_create(user=request.user)
-    items = cart.cartitem_set.all()
+    pending_product_id = request.session.pop('pending_cart_product_id', None)
+    if pending_product_id:
+        pending_product = Product.objects.filter(pk=pending_product_id).first()
+        if pending_product:
+            _add_product_to_cart(request.user, pending_product)
+
+    items = cart.cartitem_set.select_related('product').all()
 
     total = sum(item.product.price * item.quantity for item in items)
 
@@ -175,7 +209,7 @@ Order Details:
     admin_message += f"\nTotal Amount: ₹{total}"
 
     send_mail(
-        "New Order Placed - Noplastiks",
+        "New Order Placed - BrainyBoss",
         admin_message,
         settings.EMAIL_HOST_USER,
         ["konardhanalakshmi@gmail.com"],
@@ -184,7 +218,7 @@ Order Details:
 
     # CUSTOMER MAIL
     customer_message = f"""
-Thank you for shopping with Noplastiks!
+Thank you for shopping with BrainyBoss!
 
 Order Summary:
 """
@@ -195,7 +229,7 @@ Order Summary:
     customer_message += f"\nTotal Paid: ₹{total}"
 
     send_mail(
-        "Order Confirmation - Noplastiks",
+        "Order Confirmation - BrainyBoss",
         customer_message,
         settings.EMAIL_HOST_USER,
         [request.user.email],
@@ -229,7 +263,7 @@ Message:
 """
 
         send_mail(
-            "New Contact Message - Noplastiks",
+            "New Contact Message - BrainyBoss",
             mail_message,
             settings.EMAIL_HOST_USER,
             ["konardhanalakshmi@gmail.com"],

@@ -2,9 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login | Noplastiks</title>
+    <title>Sign in | BrainyBoss</title>
+    <link rel="icon" type="image/png" href="{% static 'img/brainyboss_logo.png' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="auth-body">
@@ -13,8 +16,8 @@
 
     <!-- Left Branding Section -->
     <div class="auth-left">
-        <h1>NoPlastiks</h1>
-        <p>Wooden Toys Crafted With Purpose.</p>
+        <img src="{% static 'img/brainyboss_logo.png' %}" alt="BrainyBoss" class="auth-brand-logo">
+        <p>Thoughtful play, beautifully made.</p>
     </div>
 
     <!-- Right Login Card -->
@@ -23,10 +26,16 @@
 
         <form method="POST" class="auth-form">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            {% if form.non_field_errors %}
+                <div role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
 
             <div class="input-group">
                 {{ form.username.label_tag }}
                 {{ form.username }}
+                {{ form.username.errors }}
             </div>
 
             <div class="input-group">
@@ -40,6 +49,7 @@
         <p class="auth-footer">
             Don't have an account?
             <a href="{% url 'register' %}">Create one</a>
+            <br>Verify your email before signing in.
         </p>
     </div>
 

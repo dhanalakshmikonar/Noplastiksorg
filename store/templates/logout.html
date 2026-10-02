@@ -2,12 +2,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Logout | NoPlastiks</title>
+    <title>Logout | BrainyBoss</title>
+    <link rel="icon" type="image/png" href="{% static 'img/brainyboss_logo.png' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body class="auth-body">
 
 <div class="auth-container">
+    <a href="{% url 'home' %}" class="brand-lockup" aria-label="BrainyBoss home">
+        <img src="{% static 'img/brainyboss_logo.png' %}" alt="" class="brand-logo-image">
+        <span class="brand-name">BrainyBoss</span>
+    </a>
     <h2>Are you sure you want to logout?</h2>
 
     <form method="POST">

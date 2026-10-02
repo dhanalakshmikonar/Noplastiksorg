@@ -1,13 +1,14 @@
 from django.urls import path
 from . import views
-from django.contrib.auth import views as auth_views
 from store.admin import public_admin_site
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('catalog/', views.catalog, name='catalog'),
     path('register/', views.register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('login/', views.EmailLoginView.as_view(), name='login'),
+    path('verify-email/<uidb64>/<token>/', views.verify_email, name='verify_email'),
+    path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
     path('contact/', views.contact, name='contact'),
     path("admin/", public_admin_site.urls),

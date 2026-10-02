@@ -1,7 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Secure Checkout | Noplastiks</title>
+    <title>Secure Checkout | BrainyBoss</title>
+    <link rel="icon" type="image/png" href="{% static 'img/brainyboss_logo.png' %}">
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
@@ -9,7 +11,7 @@
         body {
             margin: 0;
             font-family: 'Inter', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f3ef, #e8e6e1);
+            background: radial-gradient(circle at top left, #efe3ce, transparent 42%), #f9f6ef;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,8 +22,10 @@
             background: #ffffff;
             padding: 50px;
             width: 420px;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            max-width: calc(100% - 32px);
+            border: 1px solid rgba(25, 38, 49, 0.08);
+            border-radius: 26px;
+            box-shadow: 0 24px 65px rgba(24, 37, 46, 0.12);
             text-align: center;
             animation: fadeIn 0.6s ease-in-out;
         }
@@ -32,13 +36,21 @@
         }
 
         .brand {
-            font-size: 22px;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #192631;
+            font-family: Georgia, serif;
+            font-size: 24px;
+            font-weight: 700;
             margin-bottom: 10px;
         }
 
+        .brand img { width: 64px; height: 64px; object-fit: contain; border-radius: 12px; }
+
         .subtitle {
-            color: #777;
+            color: #68747a;
             margin-bottom: 30px;
         }
 
@@ -60,7 +72,7 @@
             padding: 14px;
             border: none;
             border-radius: 40px;
-            background: linear-gradient(135deg, #b48a2c, #d4af37);
+            background: linear-gradient(120deg, #94702f, #bd9142);
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -85,7 +97,7 @@
 
 <div class="checkout-card">
 
-    <div class="brand">Noplastiks</div>
+    <div class="brand"><img src="{% static 'img/brainyboss_logo.png' %}" alt="BrainyBoss logo"> BrainyBoss</div>
     <div class="subtitle">Premium Quality Wooden Toys</div>
 
     <div class="amount-box">
@@ -109,8 +121,8 @@ var options = {
     "amount": "{{ payment.amount }}",
     "currency": "INR",
     "order_id": "{{ payment.id }}",
-    "name": "Noplastiks",
-    "description": "Luxury Wooden Toys",
+    "name": "BrainyBoss",
+    "description": "Thoughtful play, beautifully made",
     "theme": {
         "color": "#b48a2c"
     },
