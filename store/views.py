@@ -13,7 +13,9 @@ from django.core.validators import validate_email
 from django.db.models import Case, IntegerField, Value, When
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils import timezone
 from .forms import CleanUserCreationForm, EmailAuthenticationForm
+from .email_notifications import send_branded_email
 from .models import Product, Cart, CartItem
 import razorpay
 
@@ -91,6 +93,21 @@ def verify_email(request, uidb64, token):
 class EmailLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = EmailAuthenticationForm
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = form.get_user()
+        send_branded_email(
+            kind='successful login',
+            subject='New sign-in to your Noplastiks account',
+            recipient=user.email,
+            template='login_notification',
+            context={
+                'customer_name': user.get_full_name() or user.get_username(),
+                'login_at': timezone.localtime(),
+            },
+        )
+        return response
 
 
 # =========================
@@ -204,46 +221,19 @@ def payment_success(request):
 
     total = sum(item.product.price * item.quantity for item in items)
 
-    admin_message = f"""
-New Order Received!
-
-Customer: {request.user.username}
-Email: {request.user.email}
-
-Order Details:
-"""
-
-    for item in items:
-        admin_message += f"{item.product.name} - Qty: {item.quantity}\n"
-
-    admin_message += f"\nTotal Amount: ₹{total}"
-
-    send_mail(
-        "New Order Placed - BrainyBoss",
-        admin_message,
-                settings.DEFAULT_FROM_EMAIL,
-        ["konardhanalakshmi@gmail.com"],
-        fail_silently=False,
-    )
-
-    # CUSTOMER MAIL
-    customer_message = f"""
-Thank you for shopping with BrainyBoss!
-
-Order Summary:
-"""
-
-    for item in items:
-        customer_message += f"{item.product.name} - Qty: {item.quantity}\n"
-
-    customer_message += f"\nTotal Paid: ₹{total}"
-
-    send_mail(
-        "Order Confirmation - BrainyBoss",
-        customer_message,
-        settings.DEFAULT_FROM_EMAIL,
-        [request.user.email],
-        fail_silently=False,
+    order_items = list(items.select_related('product'))
+    send_branded_email(
+        kind='new order',
+        subject='New order placed - Noplastiks',
+        recipient=settings.ADMIN_EMAIL,
+        template='order_placed',
+        context={
+            'customer_name': request.user.get_full_name() or request.user.get_username(),
+            'customer_email': request.user.email,
+            'items': order_items,
+            'total': total,
+            'placed_at': timezone.localtime(),
+        },
     )
 
     items.delete()
@@ -275,14 +265,14 @@ def contact(request):
                 "error": "Please enter a valid email address.",
             })
 
-        from urllib.parse import quote
-
-        subject = quote("Contact message for BrainyBoss")
-        body = quote(f"From: {name} ({email})\n\n{message}")
-        mailto_url = f"mailto:nambi.in09@gmail.com?subject={subject}&body={body}"
-        return render(request, "contact.html", {
-            **form_data,
-            "mailto_url": mailto_url,
-        })
+        send_branded_email(
+            kind='contact form submission',
+            subject='New contact message - Noplastiks',
+            recipient=settings.ADMIN_EMAIL,
+            template='contact_submission',
+            context=form_data,
+            reply_to=email,
+        )
+        return render(request, "contact.html", {"success": True})
 
     return render(request, "contact.html")

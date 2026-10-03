@@ -1,0 +1,13 @@
+Noplastiks | New order received
+
+A new order was placed on {{ placed_at }}.
+
+Customer: {{ customer_name }}
+Email: {{ customer_email }}
+
+Order details:
+{% for item in items %}- {{ item.product.name }} — quantity {{ item.quantity }} — {{ item.subtotal }}
+{% endfor %}
+Total: {{ total }}
+
+Please review this order in the Noplastiks admin dashboard.

@@ -1,0 +1,9 @@
+Noplastiks | New sign-in
+
+Hello {{ customer_name }},
+
+Your Noplastiks account was successfully signed in at {{ login_at }}.
+
+If this was you, no action is needed. If you do not recognize this sign-in, please change your password and contact support.
+
+Noplastiks

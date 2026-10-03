@@ -1,0 +1,9 @@
+Noplastiks | New contact message
+
+A visitor submitted a message through the contact form.
+
+Name: {{ name }}
+Email: {{ email }}
+
+Message:
+{{ message }}

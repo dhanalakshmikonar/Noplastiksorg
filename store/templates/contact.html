@@ -57,7 +57,7 @@
 
 <!-- CONTACT CONTENT -->
 <section class="contact-section">
-  {% if mailto_url %}<p class="contact-feedback success" role="status">Your email app is ready with your message. <a href="{{ mailto_url }}">Open email to send it to BrainyBoss</a>.</p>{% endif %}
+  {% if success %}<p class="contact-feedback success" role="status">Thank you for contacting Noplastiks. Your message has been submitted.</p>{% endif %}
   {% if error %}<p class="contact-feedback error" role="alert">{{ error }}</p>{% endif %}
   <div class="contact-grid">
     <form method="POST" action="{% url 'contact' %}" class="contact-form">

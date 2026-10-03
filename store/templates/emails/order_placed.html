@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;background:#f4f1e9;color:#202923;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f1e9;padding:28px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;background:#fff;border-radius:16px;overflow:hidden;">
+        <tr><td style="background:#173b32;padding:26px 30px;color:#fff;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#d8bd76;">Noplastiks</div>
+          <h1 style="font-size:25px;line-height:1.3;margin:10px 0 0;">New order received</h1>
+        </td></tr>
+        <tr><td style="padding:28px 30px;">
+          <p style="margin:0 0 20px;line-height:1.6;">A customer placed an order on {{ placed_at }}.</p>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;line-height:1.6;margin-bottom:22px;">
+            <tr><td style="padding:5px 0;color:#69736d;">Customer</td><td align="right" style="padding:5px 0;font-weight:bold;">{{ customer_name }}</td></tr>
+            <tr><td style="padding:5px 0;color:#69736d;">Email</td><td align="right" style="padding:5px 0;">{{ customer_email }}</td></tr>
+          </table>
+          <h2 style="font-size:17px;margin:0 0 10px;">Order details</h2>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
+            {% for item in items %}
+            <tr><td style="border-top:1px solid #e8e7e1;padding:12px 4px;">{{ item.product.name }} <span style="color:#69736d;">× {{ item.quantity }}</span></td><td align="right" style="border-top:1px solid #e8e7e1;padding:12px 4px;">₹{{ item.subtotal }}</td></tr>
+            {% endfor %}
+            <tr><td style="border-top:2px solid #173b32;padding:14px 4px;font-weight:bold;">Order total</td><td align="right" style="border-top:2px solid #173b32;padding:14px 4px;font-weight:bold;">₹{{ total }}</td></tr>
+          </table>
+          <p style="margin:24px 0 0;color:#69736d;font-size:13px;line-height:1.6;">Review and manage this order from the Noplastiks admin dashboard.</p>
+        </td></tr>
+        <tr><td style="padding:17px 30px;background:#faf9f6;color:#69736d;font-size:12px;">Noplastiks · Thoughtful goods, made to last.</td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
