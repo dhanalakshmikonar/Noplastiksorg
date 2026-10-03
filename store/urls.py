@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from store.admin import public_admin_site
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -11,7 +10,6 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
     path('contact/', views.contact, name='contact'),
-    path("admin/", public_admin_site.urls),
     
 
     # Cart

@@ -1,0 +1,45 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/brainyboss_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="bb-dashboard" aria-label="Store overview">
+        <div class="bb-stat-grid">
+            {% for stat in dashboard_stats %}
+                <a class="bb-stat-card" href="{{ stat.url }}">
+                    <span>{{ stat.label }}</span>
+                    <strong>{{ stat.value }}</strong>
+                </a>
+            {% endfor %}
+        </div>
+
+        <section class="bb-recent-products" aria-labelledby="bb-recent-title">
+            <h2 id="bb-recent-title">Recently added products</h2>
+            {% if recent_products %}
+                <div class="bb-table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th scope="col">Product</th><th scope="col">Price</th><th scope="col">Stock</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for product in recent_products %}
+                                <tr>
+                                    <td><a href="{{ product.url }}">{{ product.name }}</a></td>
+                                    <td>₹{{ product.price }}</td>
+                                    <td>{{ product.stock }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No products have been added yet.</p>
+            {% endif %}
+        </section>
+    </section>
+    {{ block.super }}
+{% endblock %}

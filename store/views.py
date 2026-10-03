@@ -8,8 +8,11 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
-from django.core.mail import send_mail
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db.models import Case, IntegerField, Value, When
 from django.conf import settings
+from django.core.mail import send_mail
 from .forms import CleanUserCreationForm, EmailAuthenticationForm
 from .models import Product, Cart, CartItem
 import razorpay
@@ -19,7 +22,14 @@ import razorpay
 # HOME
 # =========================
 def home(request):
-    featured_products = Product.objects.only('id', 'name', 'price', 'image').order_by('created_at')[:3]
+    featured_products = Product.objects.only('id', 'name', 'price', 'image').order_by(
+        Case(
+            When(name__icontains='neuromaze', then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        ),
+        'created_at',
+    )[:4]
     return render(request, 'home.html', {'featured_products': featured_products})
 
 
@@ -211,7 +221,7 @@ Order Details:
     send_mail(
         "New Order Placed - BrainyBoss",
         admin_message,
-        settings.EMAIL_HOST_USER,
+                settings.DEFAULT_FROM_EMAIL,
         ["konardhanalakshmi@gmail.com"],
         fail_silently=False,
     )
@@ -231,7 +241,7 @@ Order Summary:
     send_mail(
         "Order Confirmation - BrainyBoss",
         customer_message,
-        settings.EMAIL_HOST_USER,
+        settings.DEFAULT_FROM_EMAIL,
         [request.user.email],
         fail_silently=False,
     )
@@ -245,31 +255,34 @@ Order Summary:
 # CONTACT
 # =========================
 def contact(request):
-
     if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        message = request.POST.get("message", "").strip()
 
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        message = request.POST.get("message")
+        form_data = {"name": name, "email": email, "message": message}
+        if not name or not email or not message:
+            return render(request, "contact.html", {
+                **form_data,
+                "error": "Please complete all fields before sending your message.",
+            })
 
-        mail_message = f"""
-New Contact Form Submission
+        try:
+            validate_email(email)
+        except ValidationError:
+            return render(request, "contact.html", {
+                **form_data,
+                "error": "Please enter a valid email address.",
+            })
 
-Name: {name}
-Email: {email}
+        from urllib.parse import quote
 
-Message:
-{message}
-"""
-
-        send_mail(
-            "New Contact Message - BrainyBoss",
-            mail_message,
-            settings.EMAIL_HOST_USER,
-            ["konardhanalakshmi@gmail.com"],
-            fail_silently=False,
-        )
-
-        return render(request, "contact.html", {"success": True})
+        subject = quote("Contact message for BrainyBoss")
+        body = quote(f"From: {name} ({email})\n\n{message}")
+        mailto_url = f"mailto:nambi.in09@gmail.com?subject={subject}&body={body}"
+        return render(request, "contact.html", {
+            **form_data,
+            "mailto_url": mailto_url,
+        })
 
     return render(request, "contact.html")
