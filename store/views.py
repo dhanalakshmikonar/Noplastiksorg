@@ -100,7 +100,6 @@ class EmailLoginView(LoginView):
         send_branded_email(
             kind='successful login',
             subject='New sign-in to your Noplastiks account',
-            recipient=user.email,
             template='login_notification',
             context={
                 'customer_name': user.get_full_name() or user.get_username(),
@@ -217,26 +216,26 @@ def checkout(request):
 def payment_success(request):
 
     cart = Cart.objects.get(user=request.user)
-    items = cart.cartitem_set.all()
+    items = cart.cartitem_set.select_related('product').all()
+    order_items = list(items)
+    total = sum(item.product.price * item.quantity for item in order_items)
 
-    total = sum(item.product.price * item.quantity for item in items)
-
-    order_items = list(items.select_related('product'))
-    send_branded_email(
-        kind='new order',
-        subject='New order placed - Noplastiks',
-        recipient=settings.ADMIN_EMAIL,
-        template='order_placed',
-        context={
-            'customer_name': request.user.get_full_name() or request.user.get_username(),
-            'customer_email': request.user.email,
-            'items': order_items,
-            'total': total,
-            'placed_at': timezone.localtime(),
-        },
-    )
-
-    items.delete()
+    # Clearing the cart before sending makes a refresh of this success page
+    # unable to send the same cart notification a second time.
+    if order_items:
+        items.delete()
+        send_branded_email(
+            kind='new order',
+            subject='New order placed - Noplastiks',
+            template='order_placed',
+            context={
+                'customer_name': request.user.get_full_name() or request.user.get_username(),
+                'customer_email': request.user.email,
+                'items': order_items,
+                'total': total,
+                'placed_at': timezone.localtime(),
+            },
+        )
 
     return render(request, "success.html")
 
@@ -265,14 +264,18 @@ def contact(request):
                 "error": "Please enter a valid email address.",
             })
 
-        send_branded_email(
+        sent = send_branded_email(
             kind='contact form submission',
             subject='New contact message - Noplastiks',
-            recipient=settings.ADMIN_EMAIL,
             template='contact_submission',
             context=form_data,
             reply_to=email,
         )
+        if not sent:
+            return render(request, "contact.html", {
+                **form_data,
+                "error": "We couldn't send your message right now. Please try again later.",
+            })
         return render(request, "contact.html", {"success": True})
 
     return render(request, "contact.html")
