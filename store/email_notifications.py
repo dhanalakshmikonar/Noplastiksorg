@@ -11,7 +11,7 @@ def send_branded_email(*, kind, subject, template, context, reply_to=None):
     """Send a multipart notification without exposing mail details or breaking a workflow."""
     recipient = settings.ADMIN_EMAIL
     api_key = settings.RESEND_API_KEY
-    sender = settings.EMAIL_HOST_USER
+    sender = settings.RESEND_FROM_EMAIL
     if not recipient or not api_key or not sender:
         logger.warning('Skipped %s email notification: email configuration is incomplete.', kind)
         return False

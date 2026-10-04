@@ -46,33 +46,32 @@
 </a>
     </div>
   </div>
-</header> <br><br><br>  <br><br><br><br>
+</header>
 
 
 
 
 
 
-<div style="width:90%; max-width:1200px; margin:50px auto;">
+<main class="cart-page-container">
 
-<h2 style="margin-bottom:30px;">Your Shopping Cart</h2>
+<h2 class="cart-title">Your Shopping Cart</h2>
 
 {% if items %}
 
-<div style="display:flex; gap:40px; align-items:flex-start;">
+<div class="cart-layout">
 
     <!-- LEFT SIDE : PRODUCTS -->
-    <div style="flex:2;">
+    <div class="cart-items">
 
         {% for item in items %}
-        <div style="display:flex; background:#fff; padding:25px; margin-bottom:20px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.04); align-items:center;">
+        <div class="cart-card">
 
             {% if item.product.image %}
-            <img src="{{ item.product.image.url }}"
-                 style="width:140px; height:140px; object-fit:cover; border-radius:10px;">
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-image">
             {% endif %}
 
-            <div style="margin-left:30px; flex:1;">
+            <div class="cart-info">
 
                 <h3 style="margin:0 0 10px 0;">{{ item.product.name }}</h3>
 
@@ -90,8 +89,7 @@
 
                 <form method="POST" action="{% url 'remove_from_cart' item.id %}">
                     {% csrf_token %}
-                    <button type="submit"
-                        style="margin-top:8px; padding:6px 16px; background:#111; color:#fff; border:none; border-radius:25px; cursor:pointer;">
+                    <button type="submit" class="cart-remove-button">
                         Remove
                     </button>
                 </form>
@@ -105,55 +103,52 @@
 
 
     <!-- RIGHT SIDE : ORDER SUMMARY -->
-    <div style="flex:1; background:#fff; padding:35px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.04);">
+    <aside class="cart-summary">
 
         <h3 style="margin-top:0;">Order Summary</h3>
 
-        <div style="display:flex; justify-content:space-between; margin:15px 0;">
+        <div class="summary-line">
             <span>Items ({{ cart_count }})</span>
             <span>₹ {{ total }}</span>
         </div>
 
-        <div style="display:flex; justify-content:space-between; margin:15px 0;">
+        <div class="summary-line">
             <span>Shipping</span>
             <span>Free</span>
         </div>
 
         <hr style="border:none; border-top:1px solid #eee; margin:25px 0;">
 
-        <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:bold;">
+        <div class="summary-line summary-total">
             <span>Total Amount</span>
             <span>₹ {{ total }}</span>
         </div>
 
-        <a href="{% url 'checkout' %}"
-           style="display:block; margin-top:30px; padding:14px; background:#b48a2c; color:#fff; text-align:center; border-radius:30px; font-weight:bold; text-decoration:none;">
+        <a href="{% url 'checkout' %}" class="cart-checkout-button">
             Proceed to Checkout
         </a>
 
-        <a href="{% url 'catalog' %}"
-           style="display:block; margin-top:15px; text-align:center; text-decoration:none; color:#777;">
+        <a href="{% url 'catalog' %}" class="continue-link">
             Continue Shopping
         </a>
 
-    </div>
+    </aside>
 
 </div>
 
 {% else %}
 
-<div style="text-align:center; padding:100px 0;">
+<div class="empty-cart">
     <h3>Your cart is empty</h3>
 
-    <a href="{% url 'catalog' %}"
-       style="display:inline-block; margin-top:20px; padding:14px 30px; background:#b48a2c; color:#fff; border-radius:30px; text-decoration:none;">
+    <a href="{% url 'catalog' %}" class="cart-checkout-button empty-cart-button">
         Shop Now
     </a>
-</div>
+    </div>
 
 {% endif %}
 
-</div>
+</main>
 
 </body>
 </html>

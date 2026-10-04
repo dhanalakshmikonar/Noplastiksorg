@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Checkout | BrainyBoss</title>
     <link rel="icon" type="image/png" href="{% static 'img/brainyboss_logo.png' %}">
 
@@ -89,6 +90,16 @@
             margin-top: 20px;
             font-size: 13px;
             color: #999;
+        }
+
+        @media (max-width: 520px) {
+            body { min-height: 100svh; height: auto; padding: 20px 0; }
+            .checkout-card { padding: 32px 22px; border-radius: 20px; }
+            .brand { font-size: 21px; }
+            .brand img { width: 52px; height: 52px; }
+            .amount-box { padding: 18px 14px; }
+            .amount-box h2 { font-size: 25px; }
+            .pay-btn { min-height: 48px; }
         }
     </style>
 </head>
