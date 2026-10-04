@@ -12,11 +12,11 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Case, IntegerField, Value, When
 from django.conf import settings
-from django.core.mail import send_mail
 from django.utils import timezone
+from django.db import transaction
 from .forms import CleanUserCreationForm, EmailAuthenticationForm
 from .email_notifications import send_branded_email
-from .models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem, Order, OrderItem
 import razorpay
 
 
@@ -57,14 +57,14 @@ def register(request):
             verify_url = request.build_absolute_uri(
                 reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
             )
-            subject = 'Verify your BrainyBoss email address'
-            message = (
-                f"Hello,\n\nPlease verify your email address to activate your BrainyBoss account:\n"
-                f"{verify_url}\n\nIf you did not create this account, you can ignore this message."
+            sent = send_branded_email(
+                kind='registration verification',
+                subject='Verify your Noplastiks email address',
+                template='verify_email',
+                context={'username': user.username, 'verify_url': verify_url},
+                recipient=user.email,
             )
-            try:
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
-            except Exception:
+            if not sent:
                 # Don't leave an unusable pending account if delivery couldn't be attempted.
                 user.delete()
                 error = "We couldn't send the verification email. Please try again later or contact support."
@@ -97,13 +97,28 @@ class EmailLoginView(LoginView):
     def form_valid(self, form):
         response = super().form_valid(form)
         user = form.get_user()
+        login_at = timezone.localtime()
         send_branded_email(
             kind='successful login',
-            subject='New sign-in to your Noplastiks account',
+            subject='Successful sign-in to your Noplastiks account',
             template='login_notification',
             context={
-                'customer_name': user.get_full_name() or user.get_username(),
-                'login_at': timezone.localtime(),
+                'username': user.username,
+                'customer_email': user.email,
+                'login_at': login_at,
+                'admin_notification': False,
+            },
+            recipient=user.email,
+        )
+        send_branded_email(
+            kind='admin login notification',
+            subject=f'{user.username} has logged in - Noplastiks',
+            template='login_notification',
+            context={
+                'username': user.username,
+                'customer_email': user.email,
+                'login_at': login_at,
+                'admin_notification': True,
             },
         )
         return response
@@ -184,8 +199,11 @@ def cart_view(request):
 @login_required
 def checkout(request):
 
+    if request.method == 'POST':
+        return _complete_checkout_payment(request)
+
     cart = Cart.objects.get(user=request.user)
-    items = cart.cartitem_set.all()
+    items = cart.cartitem_set.select_related('product').all()
 
     total = sum(item.product.price * item.quantity for item in items)
 
@@ -202,10 +220,26 @@ def checkout(request):
         "payment_capture": 1
     })
 
+    order = Order.objects.create(
+        user=request.user,
+        razorpay_order_id=payment['id'],
+        total_amount=total,
+    )
+    OrderItem.objects.bulk_create([
+        OrderItem(
+            order=order,
+            product=item.product,
+            product_name=item.product.name,
+            product_price=item.product.price,
+            quantity=item.quantity,
+        ) for item in items
+    ])
+
     return render(request, "payment.html", {
         "payment": payment,
         "razorpay_key": settings.RAZORPAY_KEY_ID,
-        "total": total
+        "total": total,
+        "order": order,
     })
 
 
@@ -213,31 +247,66 @@ def checkout(request):
 # PAYMENT SUCCESS
 # =========================
 @login_required
-def payment_success(request):
+@require_POST
+def _complete_checkout_payment(request):
+    razorpay_order_id = request.POST.get('razorpay_order_id', '').strip()
+    payment_id = request.POST.get('razorpay_payment_id', '').strip()
+    signature = request.POST.get('razorpay_signature', '').strip()
+    if not all((razorpay_order_id, payment_id, signature)):
+        return render(request, 'payment_error.html', status=400)
 
-    cart = Cart.objects.get(user=request.user)
-    items = cart.cartitem_set.select_related('product').all()
-    order_items = list(items)
-    total = sum(item.product.price * item.quantity for item in order_items)
+    try:
+        order = Order.objects.get(user=request.user, razorpay_order_id=razorpay_order_id)
+    except Order.DoesNotExist:
+        return render(request, 'payment_error.html', status=400)
+    if order.status == Order.Status.PAID:
+        return render(request, 'success.html')
 
-    # Clearing the cart before sending makes a refresh of this success page
-    # unable to send the same cart notification a second time.
-    if order_items:
-        items.delete()
-        send_branded_email(
-            kind='new order',
-            subject='New order placed - Noplastiks',
-            template='order_placed',
-            context={
-                'customer_name': request.user.get_full_name() or request.user.get_username(),
-                'customer_email': request.user.email,
-                'items': order_items,
-                'total': total,
-                'placed_at': timezone.localtime(),
-            },
-        )
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    try:
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature,
+        })
+    except Exception:
+        return render(request, 'payment_error.html', status=400)
 
-    return render(request, "success.html")
+    with transaction.atomic():
+        locked_order = Order.objects.select_for_update().get(pk=order.pk)
+        if locked_order.status == Order.Status.PAID:
+            return render(request, 'success.html')
+        locked_order.status = Order.Status.PAID
+        locked_order.razorpay_payment_id = payment_id
+        locked_order.paid_at = timezone.now()
+        locked_order.save(update_fields=['status', 'razorpay_payment_id', 'paid_at'])
+        CartItem.objects.filter(cart__user=request.user).delete()
+
+    send_order_emails(locked_order)
+    return render(request, 'success.html')
+
+
+def send_order_emails(order):
+    items = list(order.items.all())
+    details = {
+        'username': order.user.username,
+        'customer_email': order.user.email,
+        'order_id': order.razorpay_order_id,
+        'order_date': timezone.localtime(order.paid_at or order.created_at),
+        'order_status': order.get_status_display(),
+        'items': items,
+        'total': order.total_amount,
+        'shipping_details': '',
+    }
+    send_branded_email(
+        kind='new order', subject='New order placed - Noplastiks',
+        template='order_placed', context={**details, 'admin_notification': True},
+    )
+    send_branded_email(
+        kind='customer order confirmation', subject='Your Noplastiks order confirmation',
+        template='order_placed', context={**details, 'admin_notification': False},
+        recipient=order.user.email,
+    )
 
 
 # =========================

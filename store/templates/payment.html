@@ -120,6 +120,13 @@
         Pay Securely with Razorpay
     </button>
 
+    <form id="payment-confirmation" method="post" action="{% url 'checkout' %}" hidden>
+        {% csrf_token %}
+        <input type="hidden" name="razorpay_order_id">
+        <input type="hidden" name="razorpay_payment_id">
+        <input type="hidden" name="razorpay_signature">
+    </form>
+
     <div class="secure-text">
         🔒 100% Secure Payment • Encrypted & Safe
     </div>
@@ -138,8 +145,11 @@ var options = {
         "color": "#b48a2c"
     },
     "handler": function (response){
-        alert("Payment Successful!");
-        window.location.href = "/";
+        var form = document.getElementById('payment-confirmation');
+        form.elements.razorpay_order_id.value = response.razorpay_order_id;
+        form.elements.razorpay_payment_id.value = response.razorpay_payment_id;
+        form.elements.razorpay_signature.value = response.razorpay_signature;
+        form.submit();
     }
 };
 

@@ -7,9 +7,9 @@ from django.template.loader import render_to_string
 logger = logging.getLogger(__name__)
 
 
-def send_branded_email(*, kind, subject, template, context, reply_to=None):
+def send_branded_email(*, kind, subject, template, context, recipient=None, reply_to=None):
     """Send a multipart notification without exposing mail details or breaking a workflow."""
-    recipient = settings.ADMIN_EMAIL
+    recipient = (recipient or settings.ADMIN_EMAIL).strip()
     api_key = settings.RESEND_API_KEY
     sender = settings.RESEND_FROM_EMAIL
     if not recipient or not api_key or not sender:

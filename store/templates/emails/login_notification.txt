@@ -1,9 +1,15 @@
-Noplastiks | New sign-in
+Noplastiks | Successful login
 
-Hello {{ customer_name }},
+{% if admin_notification %}{{ username }} has logged in.
 
-Your Noplastiks account was successfully signed in at {{ login_at }}.
+Username: {{ username }}
+Registered email: {{ customer_email }}
+Date and time: {{ login_at }}
+{% else %}Hello {{ username }},
 
-If this was you, no action is needed. If you do not recognize this sign-in, please change your password and contact support.
+Your Noplastiks account was successfully logged in at {{ login_at }}.
+
+If this wasn't you, please secure your account by changing your password.
+{% endif %}
 
 Noplastiks

@@ -1,13 +1,23 @@
-Noplastiks | New order received
+Noplastiks | Order {{ order_id }}
 
-A new order was placed on {{ placed_at }}.
+{% if admin_notification %}New order received.
+Customer username: {{ username }}
+Customer email: {{ customer_email }}
+{% else %}Hello {{ username }},
+Thank you for your order with Noplastiks.
+{% endif %}
 
-Customer: {{ customer_name }}
-Email: {{ customer_email }}
+Order ID: {{ order_id }}
+Order date and time: {{ order_date }}
+Payment/order status: {{ order_status }}
 
-Order details:
-{% for item in items %}- {{ item.product.name }} — quantity {{ item.quantity }} — {{ item.subtotal }}
+Ordered products:
+{% for item in items %}- {{ item.product_name }} — quantity {{ item.quantity }} × ₹{{ item.product_price }} = ₹{{ item.subtotal }}
 {% endfor %}
-Total: {{ total }}
+Total order amount: ₹{{ total }}
+{% if shipping_details %}
+Shipping/order details:
+{{ shipping_details }}
+{% endif %}
 
-Please review this order in the Noplastiks admin dashboard.
+Noplastiks

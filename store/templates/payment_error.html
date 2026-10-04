@@ -1,0 +1,18 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment verification | Noplastiks</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f9f6ef;font-family:Arial,sans-serif;color:#192631}
+    main{max-width:460px;margin:20px;padding:36px;background:#fff;border-radius:20px;box-shadow:0 18px 50px #19263118;text-align:center}
+    a{display:inline-block;margin-top:16px;padding:13px 24px;border-radius:28px;background:#b48a2c;color:white;text-decoration:none}
+  </style>
+</head>
+<body><main>
+  <h1>We couldn’t verify this payment</h1>
+  <p>Your order has not been marked as paid. Please return to your cart and try again, or contact support if your account was charged.</p>
+  <a href="{% url 'cart' %}">Return to cart</a>
+</main></body>
+</html>
