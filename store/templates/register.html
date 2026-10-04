@@ -29,8 +29,8 @@
 <div class="auth-container">
     <h2>Create Account</h2>
 
-    {% if verification_sent %}
-        <p>Account created. Check your inbox for a verification link. You can sign in after verifying your email.</p>
+    {% if registration_complete %}
+        <p>Account created successfully. You can sign in now.</p>
     {% else %}
       {% if error %}<p role="alert">{{ error }}</p>{% endif %}
 

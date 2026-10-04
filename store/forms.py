@@ -66,7 +66,7 @@ class EmailAuthenticationForm(AuthenticationForm):
             self.user_cache = authenticate(self.request, username=username, password=password)
             if self.user_cache is None:
                 raise forms.ValidationError(
-                    "We couldn't sign you in. Check your username or email and password, and make sure you've registered and verified your email."
+                    "We couldn't sign you in. Check your username or email and password, and make sure you've registered."
                 )
             self.confirm_login_allowed(self.user_cache)
         return self.cleaned_data

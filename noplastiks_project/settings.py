@@ -146,6 +146,9 @@ RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '').strip()
 RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev').strip()
 
+# TEMPORARILY DISABLED: Re-enable customer emails after configuring a verified Resend sending domain.
+CUSTOMER_EMAILS_TEMPORARILY_DISABLED = True
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MIDDLEWARE = [

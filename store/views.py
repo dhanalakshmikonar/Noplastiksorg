@@ -52,24 +52,28 @@ def register(request):
         form = CleanUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-            verify_url = request.build_absolute_uri(
-                reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
-            )
-            sent = send_branded_email(
-                kind='registration verification',
-                subject='Verify your Noplastiks email address',
-                template='verify_email',
-                context={'username': user.username, 'verify_url': verify_url},
-                recipient=user.email,
-            )
-            if not sent:
-                # Don't leave an unusable pending account if delivery couldn't be attempted.
-                user.delete()
-                error = "We couldn't send the verification email. Please try again later or contact support."
-            else:
-                return render(request, 'register.html', {'form': CleanUserCreationForm(), 'verification_sent': True})
+            # Registration must not depend on customer email delivery while that flow is disabled.
+            user.is_active = True
+            user.save(update_fields=['is_active'])
+
+            # TEMPORARILY DISABLED: Re-enable customer emails after configuring a verified Resend sending domain.
+            if not settings.CUSTOMER_EMAILS_TEMPORARILY_DISABLED:
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                verify_url = request.build_absolute_uri(
+                    reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
+                )
+                send_branded_email(
+                    kind='registration verification',
+                    subject='Verify your Noplastiks email address',
+                    template='verify_email',
+                    context={'username': user.username, 'verify_url': verify_url},
+                    recipient=user.email,
+                )
+            return render(request, 'register.html', {
+                'form': CleanUserCreationForm(),
+                'registration_complete': True,
+            })
     else:
         form = CleanUserCreationForm()
 
@@ -98,18 +102,20 @@ class EmailLoginView(LoginView):
         response = super().form_valid(form)
         user = form.get_user()
         login_at = timezone.localtime()
-        send_branded_email(
-            kind='successful login',
-            subject='Successful sign-in to your Noplastiks account',
-            template='login_notification',
-            context={
-                'username': user.username,
-                'customer_email': user.email,
-                'login_at': login_at,
-                'admin_notification': False,
-            },
-            recipient=user.email,
-        )
+        # TEMPORARILY DISABLED: Re-enable customer emails after configuring a verified Resend sending domain.
+        if not settings.CUSTOMER_EMAILS_TEMPORARILY_DISABLED:
+            send_branded_email(
+                kind='successful login',
+                subject='Successful sign-in to your Noplastiks account',
+                template='login_notification',
+                context={
+                    'username': user.username,
+                    'customer_email': user.email,
+                    'login_at': login_at,
+                    'admin_notification': False,
+                },
+                recipient=user.email,
+            )
         send_branded_email(
             kind='admin login notification',
             subject=f'{user.username} has logged in - Noplastiks',
@@ -302,11 +308,13 @@ def send_order_emails(order):
         kind='new order', subject='New order placed - Noplastiks',
         template='order_placed', context={**details, 'admin_notification': True},
     )
-    send_branded_email(
-        kind='customer order confirmation', subject='Your Noplastiks order confirmation',
-        template='order_placed', context={**details, 'admin_notification': False},
-        recipient=order.user.email,
-    )
+    # TEMPORARILY DISABLED: Re-enable customer emails after configuring a verified Resend sending domain.
+    if not settings.CUSTOMER_EMAILS_TEMPORARILY_DISABLED:
+        send_branded_email(
+            kind='customer order confirmation', subject='Your Noplastiks order confirmation',
+            template='order_placed', context={**details, 'admin_notification': False},
+            recipient=order.user.email,
+        )
 
 
 # =========================
